@@ -1,0 +1,15 @@
+<api>
+  <jcw-types>
+    <type name="MainActivity" package="crc64aac9218f3afae138" application_java_class="android.app.Application" mono_runtime_initialization="mono.MonoPackageManager.LoadApplication (context);" extends_type="crc6488302ad6e9e4df1a.MauiAppCompatActivity" partial_assembly_qualified_name="PhoneCardTracker.MainActivity, PhoneCardTracker">
+      <constructors>
+        <constructor name="MainActivity" method="n_.ctor:()V:" jni_signature="()V" managed_parameters="" retval="void" is_dynamically_registered="True" />
+        <constructor name="MainActivity" method="n_.ctor:(I)V:" jni_signature="(I)V" managed_parameters="System.Int32, System.Private.CoreLib" params="int p0" retval="void" is_dynamically_registered="True" super_call="p0" activate_call="p0" />
+      </constructors>
+    </type>
+    <type name="MainApplication" package="crc64aac9218f3afae138" application_java_class="android.app.Application" mono_runtime_initialization="mono.MonoPackageManager.LoadApplication (context);" extends_type="crc6488302ad6e9e4df1a.MauiApplication" is_application="True" partial_assembly_qualified_name="PhoneCardTracker.MainApplication, PhoneCardTracker" application_constructor="MainApplication" />
+  </jcw-types>
+  <acw-types partial-assembly-name="PhoneCardTracker" module-name="PhoneCardTracker.dll">
+    <type assembly-qualified-name="PhoneCardTracker.MainActivity, PhoneCardTracker, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" compat-jni-name="phonecardtracker.MainActivity" java-key="crc64aac9218f3afae138.MainActivity" managed-key="PhoneCardTracker.MainActivity" partial-assembly-qualified-name="PhoneCardTracker.MainActivity, PhoneCardTracker" />
+    <type assembly-qualified-name="PhoneCardTracker.MainApplication, PhoneCardTracker, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" compat-jni-name="phonecardtracker.MainApplication" java-key="crc64aac9218f3afae138.MainApplication" managed-key="PhoneCardTracker.MainApplication" partial-assembly-qualified-name="PhoneCardTracker.MainApplication, PhoneCardTracker" />
+  </acw-types>
+</api>
