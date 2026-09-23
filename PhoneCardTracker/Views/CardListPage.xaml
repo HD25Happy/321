@@ -1,0 +1,442 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:PhoneCardTracker.Models"
+             x:Class="PhoneCardTracker.Views.CardListPage"
+             Title="Set Overview">
+
+    <!-- Root Grid containing main view and modal popups -->
+    <Grid>
+
+        <!-- 1. Main Content -->
+        <Grid RowDefinitions="Auto, *, Auto">
+
+            <!-- Header -->
+            <Border Grid.Row="0"
+                    Margin="12,8,12,4"
+                    Padding="14,10"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
+                    Stroke="{StaticResource Gray500}">
+                <Grid ColumnDefinitions="*, Auto, Auto" ColumnSpacing="8" VerticalOptions="Center">
+                    <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
+                        <Label x:Name="SetTitleLabel"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light={StaticResource PrimaryDarkText}, Dark={StaticResource White}}" />
+                        <Label x:Name="SetSubtitleLabel"
+                               FontSize="12"
+                               TextColor="{StaticResource Gray400}" />
+                    </VerticalStackLayout>
+
+                    <!-- Binder / List Switch -->
+                    <Button Grid.Column="1"
+                            x:Name="ViewModeBtn"
+                            Text="📖 Binder"
+                            FontSize="12"
+                            Padding="10,0"
+                            HeightRequest="36"
+                            Clicked="OnToggleViewModeClicked" />
+
+                    <!-- Settings (only visible in Binder View) -->
+                    <Button Grid.Column="2"
+                            x:Name="SettingsBtn"
+                            Text="⚙️"
+                            FontSize="16"
+                            Padding="0"
+                            WidthRequest="36"
+                            HeightRequest="36"
+                            IsVisible="False"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                            TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}"
+                            Clicked="OnOpenSettingsClicked" />
+                </Grid>
+            </Border>
+
+            <!-- Card Grid -->
+            <CollectionView Grid.Row="1"
+                            x:Name="CardsCollectionView"
+                            Margin="6,0"
+                            SelectionMode="None">
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout x:Name="CardsLayout"
+                                     Orientation="Vertical"
+                                     Span="2"
+                                     HorizontalItemSpacing="6"
+                                     VerticalItemSpacing="6" />
+                </CollectionView.ItemsLayout>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:Card">
+                        <Border StrokeShape="RoundRectangle 10"
+                                Stroke="{StaticResource Gray600}"
+                                StrokeThickness="1"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
+                                Padding="6">
+
+                            <!-- Tapping card opens details popup -->
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnCardTapped" CommandParameter="{Binding .}" />
+                            </Border.GestureRecognizers>
+
+                            <VerticalStackLayout Spacing="4">
+
+                                <!-- Card Image (dimmed when not owned) -->
+                                <Grid HeightRequest="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=CardImageHeight}">
+                                    <Image Source="{Binding ImageUrl}"
+                                           Aspect="AspectFit"
+                                           Opacity="{Binding CardOpacity}" />
+
+                                    <!-- Holo badge -->
+                                    <Border IsVisible="{Binding HasHolo}"
+                                            HorizontalOptions="End"
+                                            VerticalOptions="Start"
+                                            Margin="2"
+                                            Padding="5,1"
+                                            BackgroundColor="#CC512BD4"
+                                            StrokeShape="RoundRectangle 4"
+                                            StrokeThickness="0">
+                                        <Label Text="✨"
+                                               TextColor="White"
+                                               FontSize="10" />
+                                    </Border>
+                                </Grid>
+
+                                <!-- Card Name & Details -->
+                                <Label Text="{Binding CardName}"
+                                       FontSize="12"
+                                       FontAttributes="Bold"
+                                       HorizontalTextAlignment="Center"
+                                       LineBreakMode="TailTruncation"
+                                       TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}" />
+
+                                <Grid ColumnDefinitions="*, *">
+                                    <Label Grid.Column="0"
+                                           Text="{Binding CardNumber, StringFormat='#{0}'}"
+                                           FontSize="11"
+                                           TextColor="{StaticResource Gray400}" />
+                                    <Label Grid.Column="1"
+                                           Text="{Binding Rarity}"
+                                           FontSize="11"
+                                           TextColor="{StaticResource Primary}"
+                                           HorizontalTextAlignment="End" />
+                                </Grid>
+
+                                <!-- Detailed counters (hidden in Binder View) -->
+                                <VerticalStackLayout IsVisible="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=IsStandardView}"
+                                                     Spacing="4">
+                                    <BoxView HeightRequest="1" Color="{StaticResource Gray200}" Margin="0,2" />
+
+                                    <!-- Normal -->
+                                    <Grid ColumnDefinitions="45, Auto, *, Auto" VerticalOptions="Center">
+                                        <Label Grid.Column="0" Text="Norm" FontSize="11" VerticalOptions="Center" TextColor="{StaticResource Gray400}" />
+                                        <Button Grid.Column="1" Text="-" WidthRequest="30" HeightRequest="28" Padding="0" FontSize="14" BackgroundColor="{StaticResource Gray600}" TextColor="White" Clicked="OnDecreaseNormalClicked" CommandParameter="{Binding .}" />
+                                        <Label Grid.Column="2" Text="{Binding OwnedNormal}" FontSize="12" FontAttributes="Bold" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}" />
+                                        <Button Grid.Column="3" Text="+" WidthRequest="30" HeightRequest="28" Padding="0" FontSize="14" BackgroundColor="{StaticResource Gray600}" TextColor="White" Clicked="OnIncreaseNormalClicked" CommandParameter="{Binding .}" />
+                                    </Grid>
+
+                                    <!-- Holo -->
+                                    <Grid ColumnDefinitions="45, Auto, *, Auto" VerticalOptions="Center">
+                                        <Label Grid.Column="0" Text="✨Holo" FontSize="11" FontAttributes="Bold" VerticalOptions="Center" TextColor="{StaticResource Primary}" />
+                                        <Button Grid.Column="1" Text="-" WidthRequest="30" HeightRequest="28" Padding="0" FontSize="14" BackgroundColor="{StaticResource Gray600}" TextColor="White" Clicked="OnDecreaseHoloClicked" CommandParameter="{Binding .}" />
+                                        <Label Grid.Column="2" Text="{Binding OwnedHolo}" FontSize="12" FontAttributes="Bold" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}" />
+                                        <Button Grid.Column="3" Text="+" WidthRequest="30" HeightRequest="28" Padding="0" FontSize="14" BackgroundColor="{StaticResource Primary}" TextColor="White" Clicked="OnIncreaseHoloClicked" CommandParameter="{Binding .}" />
+                                    </Grid>
+                                </VerticalStackLayout>
+
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- Binder Page Navigation -->
+            <Border Grid.Row="2"
+                    x:Name="PaginationBar"
+                    IsVisible="False"
+                    Margin="12,6,12,10"
+                    Padding="12,6"
+                    StrokeShape="RoundRectangle 10"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
+                    Stroke="{StaticResource Gray500}">
+                <Grid ColumnDefinitions="Auto, *, Auto" VerticalOptions="Center">
+                    <Button Grid.Column="0"
+                            x:Name="PrevPageBtn"
+                            Text="◀ Prev"
+                            FontSize="13"
+                            HeightRequest="36"
+                            Padding="14,0"
+                            Clicked="OnPrevPageClicked" />
+
+                    <Label Grid.Column="1"
+                           x:Name="PageIndicatorLabel"
+                           Text="Page 1 of 1"
+                           FontSize="13"
+                           FontAttributes="Bold"
+                           HorizontalTextAlignment="Center"
+                           VerticalTextAlignment="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}" />
+
+                    <Button Grid.Column="2"
+                            x:Name="NextPageBtn"
+                            Text="Next ▶"
+                            FontSize="13"
+                            HeightRequest="36"
+                            Padding="14,0"
+                            Clicked="OnNextPageClicked" />
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- 2. CARD DETAILS POPUP -->
+        <Grid x:Name="CardDetailModal"
+              IsVisible="False"
+              InputTransparent="False"
+              BackgroundColor="#AA000000">
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnBlockBackgroundTapped" />
+            </Grid.GestureRecognizers>
+
+            <Border WidthRequest="330"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    Padding="16"
+                    StrokeShape="RoundRectangle 16"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}"
+                    Stroke="{StaticResource Gray600}"
+                    StrokeThickness="1">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnBlockBackgroundTapped" />
+                </Border.GestureRecognizers>
+
+                <VerticalStackLayout Spacing="10">
+
+                    <Grid ColumnDefinitions="*, Auto">
+                        <Label x:Name="ModalCardNameLabel"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               LineBreakMode="TailTruncation"
+                               TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}" />
+                        <Button Grid.Column="1"
+                                Text="✕"
+                                FontSize="14"
+                                WidthRequest="32"
+                                HeightRequest="32"
+                                Padding="0"
+                                BackgroundColor="Transparent"
+                                TextColor="{StaticResource Gray400}"
+                                Clicked="OnCloseCardDetailClicked" />
+                    </Grid>
+
+                    <Label x:Name="ModalCardDetailsLabel"
+                           FontSize="12"
+                           TextColor="{StaticResource Gray400}" />
+
+                    <!-- Large Card Preview -->
+                    <Border StrokeShape="RoundRectangle 8"
+                            StrokeThickness="0"
+                            HeightRequest="300"
+                            BackgroundColor="Transparent">
+                        <Image x:Name="ModalCardImage"
+                               Aspect="AspectFit" />
+                    </Border>
+
+                    <BoxView HeightRequest="1" Color="{StaticResource Gray200}" Margin="0,4" />
+
+                    <!-- Normal Variant Control -->
+                    <Grid ColumnDefinitions="*, Auto, 50, Auto" VerticalOptions="Center">
+                        <Label Grid.Column="0"
+                               Text="Normal copy"
+                               FontSize="14"
+                               VerticalOptions="Center"
+                               TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}" />
+
+                        <Button Grid.Column="1"
+                                Text="-"
+                                WidthRequest="38"
+                                HeightRequest="36"
+                                Padding="0"
+                                FontSize="18"
+                                BackgroundColor="{StaticResource Gray600}"
+                                TextColor="White"
+                                Clicked="OnModalDecreaseNormalClicked" />
+
+                        <Label Grid.Column="2"
+                               x:Name="ModalNormalCountLabel"
+                               Text="0"
+                               FontSize="16"
+                               FontAttributes="Bold"
+                               HorizontalTextAlignment="Center"
+                               VerticalTextAlignment="Center"
+                               TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}" />
+
+                        <Button Grid.Column="3"
+                                Text="+"
+                                WidthRequest="38"
+                                HeightRequest="36"
+                                Padding="0"
+                                FontSize="18"
+                                BackgroundColor="{StaticResource Gray600}"
+                                TextColor="White"
+                                Clicked="OnModalIncreaseNormalClicked" />
+                    </Grid>
+
+                    <!-- Holo Variant Control -->
+                    <Grid ColumnDefinitions="*, Auto, 50, Auto" VerticalOptions="Center">
+                        <Label Grid.Column="0"
+                               Text="✨ Holo copy"
+                               FontSize="14"
+                               FontAttributes="Bold"
+                               VerticalOptions="Center"
+                               TextColor="{StaticResource Primary}" />
+
+                        <Button Grid.Column="1"
+                                Text="-"
+                                WidthRequest="38"
+                                HeightRequest="36"
+                                Padding="0"
+                                FontSize="18"
+                                BackgroundColor="{StaticResource Gray600}"
+                                TextColor="White"
+                                Clicked="OnModalDecreaseHoloClicked" />
+
+                        <Label Grid.Column="2"
+                               x:Name="ModalHoloCountLabel"
+                               Text="0"
+                               FontSize="16"
+                               FontAttributes="Bold"
+                               HorizontalTextAlignment="Center"
+                               VerticalTextAlignment="Center"
+                               TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}" />
+
+                        <Button Grid.Column="3"
+                                Text="+"
+                                WidthRequest="38"
+                                HeightRequest="36"
+                                Padding="0"
+                                FontSize="18"
+                                BackgroundColor="{StaticResource Primary}"
+                                TextColor="White"
+                                Clicked="OnModalIncreaseHoloClicked" />
+                    </Grid>
+
+                    <Button Text="Done"
+                            Margin="0,8,0,0"
+                            BackgroundColor="{StaticResource Primary}"
+                            TextColor="White"
+                            HeightRequest="40"
+                            Clicked="OnCloseCardDetailClicked" />
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+
+        <!-- 3. BINDER SETTINGS POPUP -->
+        <Grid x:Name="SettingsModalOverlay"
+              IsVisible="False"
+              InputTransparent="False"
+              BackgroundColor="#88000000">
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnBlockBackgroundTapped" />
+            </Grid.GestureRecognizers>
+
+            <Border WidthRequest="320"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    Padding="20"
+                    StrokeShape="RoundRectangle 16"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}"
+                    Stroke="{StaticResource Gray600}"
+                    StrokeThickness="1">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnBlockBackgroundTapped" />
+                </Border.GestureRecognizers>
+
+                <VerticalStackLayout Spacing="16">
+
+                    <Grid ColumnDefinitions="*, Auto">
+                        <Label Grid.Column="0"
+                               Text="Binder Settings"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}" />
+                        <Button Grid.Column="1"
+                                Text="✕"
+                                FontSize="14"
+                                WidthRequest="32"
+                                HeightRequest="32"
+                                Padding="0"
+                                BackgroundColor="Transparent"
+                                TextColor="{StaticResource Gray400}"
+                                Clicked="OnCloseSettingsClicked" />
+                    </Grid>
+
+                    <BoxView HeightRequest="1" Color="{StaticResource Gray200}" />
+
+                    <!-- Columns -->
+                    <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
+                        <VerticalStackLayout Grid.Column="0">
+                            <Label x:Name="ModalColumnsLabel"
+                                   Text="Columns: 3"
+                                   FontSize="14"
+                                   FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}" />
+                            <Label Text="Cards horizontal (1 - 5)"
+                                   FontSize="11"
+                                   TextColor="{StaticResource Gray400}" />
+                        </VerticalStackLayout>
+
+                        <Stepper Grid.Column="1"
+                                 x:Name="ModalColumnsStepper"
+                                 Minimum="1"
+                                 Maximum="5"
+                                 Increment="1"
+                                 Value="3"
+                                 ValueChanged="OnModalSettingsChanged" />
+                    </Grid>
+
+                    <!-- Rows -->
+                    <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
+                        <VerticalStackLayout Grid.Column="0">
+                            <Label x:Name="ModalRowsLabel"
+                                   Text="Rows: 3"
+                                   FontSize="14"
+                                   FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}" />
+                            <Label Text="Cards vertical (1 - 5)"
+                                   FontSize="11"
+                                   TextColor="{StaticResource Gray400}" />
+                        </VerticalStackLayout>
+
+                        <Stepper Grid.Column="1"
+                                 x:Name="ModalRowsStepper"
+                                 Minimum="1"
+                                 Maximum="5"
+                                 Increment="1"
+                                 Value="3"
+                                 ValueChanged="OnModalSettingsChanged" />
+                    </Grid>
+
+                    <!-- Preview -->
+                    <Border Padding="10"
+                            StrokeShape="RoundRectangle 8"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
+                            StrokeThickness="0">
+                        <Label x:Name="ModalTotalCardsPreviewLabel"
+                               Text="9 cards per binder page"
+                               FontSize="12"
+                               HorizontalTextAlignment="Center"
+                               TextColor="{StaticResource Primary}" />
+                    </Border>
+
+                    <Button Text="Save &amp; Close"
+                            BackgroundColor="{StaticResource Primary}"
+                            TextColor="White"
+                            HeightRequest="42"
+                            Clicked="OnCloseSettingsClicked" />
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+
+    </Grid>
+
+</ContentPage>
