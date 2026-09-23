@@ -1,0 +1,31 @@
+{
+  "game": "Pokemon",
+  "setName": "Base Set",
+  "totalCards": 102,
+  "cards": [
+    {
+      "id": "base1-1",
+      "number": 1,
+      "name": "Alakazam",
+      "imageUrl": "https://images.pokemontcg.io/base1/1_hires.png"
+    },
+    {
+      "id": "base1-2",
+      "number": 2,
+      "name": "Blastoise",
+      "imageUrl": "https://images.pokemontcg.io/base1/2_hires.png"
+    },
+    {
+      "id": "base1-4",
+      "number": 4,
+      "name": "Charizard",
+      "imageUrl": "https://images.pokemontcg.io/base1/4_hires.png"
+    },
+    {
+      "id": "base1-15",
+      "number": 15,
+      "name": "Venusaur",
+      "imageUrl": "https://images.pokemontcg.io/base1/15_hires.png"
+    }
+  ]
+}
